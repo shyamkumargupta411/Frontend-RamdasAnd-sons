@@ -22,6 +22,18 @@ export const reportsApi = {
     client.delete(`/thresholds/${id}/`),
 };
 
+/** Bulk material upload from Excel. */
+export const bulkUploadApi = {
+  preview: (file, shopId) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (shopId) formData.append("shop_id", shopId);
+    return client.post("/reports/bulk-upload/preview/", formData).then((r) => r.data);
+  },
+  confirm: (payload) =>
+    client.post("/reports/bulk-upload/confirm/", payload).then((r) => r.data),
+};
+
 /** Download Excel blob as a file. */
 export function downloadExcel(blob, filename) {
   const url = window.URL.createObjectURL(new Blob([blob]));

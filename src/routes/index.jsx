@@ -20,6 +20,7 @@ import OwnerTransfersPage from "../pages/owner/TransfersPage";
 import OwnerUsersPage from "../pages/owner/UsersPage";
 import AdjustmentsPage from "../pages/AdjustmentsPage";
 import AuditPage from "../pages/AuditPage";
+import BulkUploadPage from "../pages/BulkUploadPage";
 import MaterialStockPage from "../pages/MaterialStockPage";
 import ReturnsPage from "../pages/ReturnsPage";
 import ReportsPage from "../pages/ReportsPage";
@@ -65,6 +66,7 @@ const router = createBrowserRouter([
       { path: "reports", element: <ReportsPage /> },
       { path: "audit", element: <AuditPage /> },
       { path: "material-stock", element: <MaterialStockPage /> },
+      { path: "bulk-upload", element: <BulkUploadPage /> },
     ],
   },
   {
@@ -86,6 +88,7 @@ const router = createBrowserRouter([
       { path: "reports", element: <ReportsPage /> },
       { path: "audit", element: <AuditPage /> },
       { path: "material-stock", element: <MaterialStockPage /> },
+      { path: "bulk-upload", element: <BulkUploadPage /> },
     ],
   },
   {

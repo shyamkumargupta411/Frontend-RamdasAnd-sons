@@ -10,6 +10,7 @@ export default function ManagerLayout() {
   const navItems = [
     { to: "/manager", label: "Dashboard", end: true },
     { to: "/manager/material-stock", label: "Material Stock" },
+    { to: "/manager/bulk-upload", label: "Bulk Upload" },
     { to: "/manager/reports", label: "Reports" },
     { to: "/manager/audit", label: "Audit Log" },
     ...(canManageProducts

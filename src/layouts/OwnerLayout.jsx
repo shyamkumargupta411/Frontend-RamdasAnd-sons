@@ -5,6 +5,7 @@ import AppLayout from "../components/layout/AppLayout";
 const navItems = [
   { to: "/owner", label: "Dashboard", end: true },
   { to: "/owner/material-stock", label: "Material Stock" },
+  { to: "/owner/bulk-upload", label: "Bulk Upload" },
   { to: "/owner/reports", label: "Reports" },
   { to: "/owner/audit", label: "Audit Log" },
   { to: "/owner/products", label: "Products" },
