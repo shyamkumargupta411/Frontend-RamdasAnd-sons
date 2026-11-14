@@ -11,8 +11,12 @@ const newKey = () =>
     ? crypto.randomUUID()
     : `sale-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+const newLineKey = () => `line-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 /**
  * Sale form (inventory-outward, no prices).
+ *
+ * Supports MULTIPLE product lines per sale (like StockInForm).
  *
  * props:
  *  - fixedShop: shop id for sellers (hidden select); null/undefined shows
@@ -29,11 +33,9 @@ export default function SaleForm({
   onCreated,
 }) {
   const [shopId, setShopId] = useState("");
-  const [product, setProduct] = useState(null);
-  const [variant, setVariant] = useState(null);
-  const [variantObj, setVariantObj] = useState(null);
-  const [qty, setQty] = useState("");
-  const [unitId, setUnitId] = useState("");
+  const [lines, setLines] = useState([
+    { key: newLineKey(), product: null, variant: null, variantObj: null, qty: "", unitId: "" },
+  ]);
   const [customer, setCustomer] = useState("");
   const [slip, setSlip] = useState(null);
   const [idemKey, setIdemKey] = useState(newKey);
@@ -57,12 +59,22 @@ export default function SaleForm({
   const shops = shopsData?.results || shopsData || [];
   const sellableShops = shops.filter((s) => s.shop_type !== "IN_TRANSIT");
 
+  const activeShopId = fixedShop || shopId;
+
   // Default the unit to the variant's own unit when a variant is picked.
   useEffect(() => {
-    if (!variantObj) return;
-    const code = variantObj.unit || variantObj.unit_code;
-    const match = units.find((u) => u.code === code);
-    if (match) setUnitId(String(match.id));
+    lines.forEach((line) => {
+      if (!line.variantObj) return;
+      const code = line.variantObj.unit || line.variantObj.unit_code;
+      const match = units.find((u) => u.code === code);
+      if (match) {
+        setLines((prev) =>
+          prev.map((l) =>
+            l.key === line.key ? { ...l, unitId: String(match.id) } : l
+          )
+        );
+      }
+    });
   }, [variantObj, units]);
 
   const createMut = useMutation({
@@ -70,10 +82,16 @@ export default function SaleForm({
     onSuccess: (sale) => {
       setError(null);
       setDone(sale);
-      setVariant(null);
-      setVariantObj(null);
-      setProduct(null);
-      setQty("");
+      setLines([
+        {
+          key: newLineKey(),
+          product: null,
+          variant: null,
+          variantObj: null,
+          qty: "",
+          unitId: "",
+        },
+      ]);
       setCustomer("");
       setSlip(null);
       setIdemKey(newKey()); // next sale gets a fresh key
@@ -88,9 +106,7 @@ export default function SaleForm({
       } else if (data?.detail) {
         setError(String(data.detail));
       } else if (data && typeof data === "object") {
-        const msgs = Object.values(data)
-          .flat()
-          .map(String);
+        const msgs = Object.values(data).flat().map(String);
         setError(msgs.join(" "));
       } else {
         setError("Could not record the sale. Check the form and try again.");
@@ -98,13 +114,30 @@ export default function SaleForm({
     },
   });
 
-  const activeShopId = fixedShop || shopId;
+  const validLines = lines.filter((l) => l.variant && l.qty && Number(l.qty) > 0);
   const canSubmit =
     activeShopId &&
-    variant &&
-    qty &&
-    Number(qty) > 0 &&
+    validLines.length > 0 &&
     !createMut.isPending;
+
+  function updateLine(key, patch) {
+    setLines((prev) =>
+      prev.map((l) => (l.key === key ? { ...l, ...patch } : l))
+    );
+  }
+
+  function addLine() {
+    setLines((prev) => [
+      ...prev,
+      { key: newLineKey(), product: null, variant: null, variantObj: null, qty: "", unitId: "" },
+    ]);
+  }
+
+  function removeLine(key) {
+    setLines((prev) =>
+      prev.length === 1 ? prev : prev.filter((l) => l.key !== key)
+    );
+  }
 
   function submit(e) {
     e.preventDefault();
@@ -113,9 +146,12 @@ export default function SaleForm({
     fd.append("shop", String(activeShopId));
     fd.append("customer_name", customer);
     fd.append("idempotency_key", idemKey);
-    const line = { variant, quantity: String(qty) };
-    if (unitId) line.unit = Number(unitId);
-    fd.append("lines", JSON.stringify([line]));
+    const lineItems = validLines.map((l) => ({
+      variant: l.variant,
+      quantity: String(l.qty),
+      ...(l.unitId ? { unit: Number(l.unitId) } : {}),
+    }));
+    fd.append("lines", JSON.stringify(lineItems));
     if (slip) fd.append("slip", slip);
     createMut.mutate(fd);
   }
@@ -159,51 +195,63 @@ export default function SaleForm({
 
       <div className="space-y-1.5">
         <span className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Product
+          Products
         </span>
-        <ProductVariantSelector
-          value={{ product, variant }}
-          onChange={(v) => {
-            setProduct(v.product);
-            setVariant(v.variant);
-            setVariantObj(v.variantObj || null);
-          }}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Quantity
-          </span>
-          <input
-            type="number"
-            min="0.001"
-            step="any"
-            inputMode="decimal"
-            value={qty}
-            onChange={(e) => setQty(e.target.value)}
-            placeholder="0.000"
-            className={inputCls}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Unit
-          </span>
-          <select
-            value={unitId}
-            onChange={(e) => setUnitId(e.target.value)}
-            className={inputCls}
-          >
-            <option value="">Unit…</option>
-            {units.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.code} — {u.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {lines.map((line) => (
+          <div key={line.key} className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <ProductVariantSelector
+                value={{ product: line.product, variant: line.variant }}
+                onChange={(v) =>
+                  updateLine(line.key, {
+                    product: v.product,
+                    variant: v.variant,
+                    variantObj: v.variantObj || null,
+                  })
+                }
+              />
+            </div>
+            <input
+              type="number"
+              min="0.001"
+              step="any"
+              inputMode="decimal"
+              value={line.qty}
+              onChange={(e) => updateLine(line.key, { qty: e.target.value })}
+              placeholder="0.000"
+              className="w-24 rounded-lg border border-slate-300 px-2 py-2 text-sm focus:border-amber-500 focus:outline-none"
+            />
+            <select
+              value={line.unitId}
+              onChange={(e) => updateLine(line.key, { unitId: e.target.value })}
+              placeholder="Unit"
+              className="w-24 rounded-lg border border-slate-300 px-2 py-2 text-sm focus:border-amber-500 focus:outline-none"
+            >
+              <option value="">Unit…</option>
+              {units.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.code} — {u.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => removeLine(line.key)}
+              disabled={lines.length === 1}
+              className="mt-1 text-xs font-semibold text-slate-400 hover:text-rose-600 disabled:opacity-40"
+              title="Remove line"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addLine}
+          className="text-xs font-semibold text-amber-600 hover:text-amber-800"
+        >
+          + Add product line
+        </button>
       </div>
 
       <label className="block">
