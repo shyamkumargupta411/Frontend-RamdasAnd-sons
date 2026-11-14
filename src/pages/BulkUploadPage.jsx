@@ -103,6 +103,7 @@ export default function BulkUploadPage() {
           <p className="mb-3 text-xs text-slate-500">
             First column = material name (e.g. "GI SATTER PATTI (HAVY) 14 FUT").
             Optional second column = quantity. Optional third = unit (KG/FEET/etc).
+            Optional fourth = shop code (e.g. WH-001).
           </p>
           <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-amber-500 hover:bg-amber-50 transition">
             <input
