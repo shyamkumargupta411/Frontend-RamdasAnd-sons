@@ -310,131 +310,128 @@ export default function MaterialStockPage() {
                 grouped.map((g) => {
                   const isExpanded = expandedId === g.product_id;
                   return (
-                    <tr key={g.product_id} className={`border-b border-slate-50/50 ${
-                      isExpanded ? "bg-amber-25" : ""
-                    }`}>
-                      <td className="px-4 py-3 text-xs font-semibold text-slate-700">
-                        {g.material}
-                      </td>
-                      <td className="px-4 py-3 text-xs font-mono text-slate-700">
-                        {g.product_code}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-600">
-                        {g.product_name}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-500">
-                        {g.unit_code}
-                      </td>
-                      <td className="px-4 py-3 text-right text-xs font-bold text-slate-700">
-                        {g.total_quantity.toFixed(3)}
-                      </td>
-                      <td className="px-4 py-3 text-center text-xs text-slate-500">
-                        {g.variant_count.size}
-                      </td>
-                      <td className="px-4 py-3 text-center text-xs text-slate-500">
-                        {g.locations.length}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setExpandedId(
-                              isExpanded ? null : g.product_id
-                            )
-                          }
-                          className={`text-xs px-2.5 py-1.5 rounded border ${
-                            isExpanded
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-slate-50 text-slate-600 border-slate-200"
-                          }`}
-                        >
-                          {isExpanded ? "Collapse" : "View Locations"}
-                        </button>
-                      </td>
-                    </tr>
+                    <>
+                      <tr key={`${g.product_id}-row`} className={`border-b border-slate-50/50 ${isExpanded ? "bg-amber-25" : ""}`}>
+                        <td className="px-4 py-3 text-xs font-semibold text-slate-700">
+                          {g.material}
+                        </td>
+                        <td className="px-4 py-3 text-xs font-mono text-slate-700">
+                          {g.product_code}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-600">
+                          {g.product_name}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-500">
+                          {g.unit_code}
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs font-bold text-slate-700">
+                          {g.total_quantity.toFixed(3)}
+                        </td>
+                        <td className="px-4 py-3 text-center text-xs text-slate-500">
+                          {g.variant_count.size}
+                        </td>
+                        <td className="px-4 py-3 text-center text-xs text-slate-500">
+                          {g.locations.length}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedId(
+                                isExpanded ? null : g.product_id
+                              )
+                            }
+                            className={`text-xs px-2.5 py-1.5 rounded border ${
+                              isExpanded
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-slate-50 text-slate-600 border-slate-200"
+                            }`}
+                          >
+                            {isExpanded ? "Collapse" : "View Locations"}
+                          </button>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="border-b border-amber-300">
+                          <td colSpan={8} className="p-0">
+                            <div className="border-l-4 border-amber-500 bg-amber-50 p-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">
+                                  Location Breakdown
+                                </span>
+                                <span className="text-xs text-amber-600 font-mono">
+                                  {g.product_code}
+                                </span>
+                              </div>
+                              <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-amber-100 text-sm">
+                                  <thead className="bg-amber-100">
+                                    <tr>
+                                      <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
+                                        Shop
+                                      </th>
+                                      <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
+                                        Type
+                                      </th>
+                                      <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
+                                        Variant Spec
+                                      </th>
+                                      <th className="px-4 py-2 text-right text-xs font-bold uppercase tracking-wide text-amber-700">
+                                        Quantity
+                                      </th>
+                                      <th className="px-4 py-2 text-right text-xs font-bold uppercase tracking-wide text-amber-700">
+                                        Unit
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-amber-200 bg-white">
+                                    {g.locations
+                                      .sort(
+                                        (a, b) =>
+                                          b.quantity - a.quantity ||
+                                          a.shop_name.localeCompare(b.shop_name)
+                                      )
+                                      .map((loc) => (
+                                        <tr key={`${loc.shop_id}-${loc.variant_id}`} className="">
+                                          <td className="px-4 py-3 text-xs text-amber-800">
+                                            {loc.shop_name}
+                                            <span className="ml-1 text-xs text-amber-500">
+                                              ({loc.shop_code})
+                                            </span>
+                                          </td>
+                                          <td className="px-4 py-3 text-xs">
+                                            <ShopTypeBadge shop_type={loc.shop_type} />
+                                          </td>
+                                          <td className="px-4 py-3 text-xs text-amber-700">
+                                            {loc.spec_label || "—"}
+                                          </td>
+                                          <td className="px-4 py-3 text-right text-xs font-bold text-amber-800">
+                                            {loc.quantity.toFixed(3)}
+                                          </td>
+                                          <td className="px-4 py-3 text-right text-xs text-amber-500">
+                                            {loc.unit_code}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div className="mt-3 flex justify-end border-t border-amber-200 pt-2">
+                                <span className="text-xs font-bold text-amber-800">
+                                  Total: {g.total_quantity.toFixed(3)}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   );
                 })
               )}
             </tbody>
           </table>
         </div>
-
-        {/* Drill-down row */}
-        {expandedId && grouped.find((g) => g.product_id === expandedId) && (
-          <tr className="border-b border-amber-300">
-            <td colSpan={8} className="p-0">
-              <div className="border-l-4 border-amber-500 bg-amber-50 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold text-amber-800 uppercase tracking-wide">
-                    Location Breakdown
-                  </span>
-                  <span className="text-xs text-amber-600 font-mono">
-                    {grouped.find((g) => g.product_id === expandedId)?.product_code}
-                  </span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-amber-100 text-sm">
-                    <thead className="bg-amber-100">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
-                          Shop
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
-                          Type
-                        </th>
-                        <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
-                          Variant Spec
-                        </th>
-                        <th className="px-4 py-2 text-right text-xs font-bold uppercase tracking-wide text-amber-700">
-                          Quantity
-                        </th>
-                        <th className="px-4 py-2 text-right text-xs font-bold uppercase tracking-wide text-amber-700">
-                          Unit
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-amber-200 bg-white">
-                      {grouped
-                        .find((g) => g.product_id === expandedId)
-                        ?.locations.sort(
-                          (a, b) =>
-                            b.quantity - a.quantity ||
-                            a.shop_name.localeCompare(b.shop_name)
-                        )
-                        .map((loc) => (
-                          <tr key={`${loc.shop_id}-${loc.variant_id}`} className="">
-                            <td className="px-4 py-3 text-xs text-amber-800">
-                              {loc.shop_name}
-                              <span className="ml-1 text-xs text-amber-500">
-                                ({loc.shop_code})
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-xs">
-                              <ShopTypeBadge shop_type={loc.shop_type} />
-                            </td>
-                            <td className="px-4 py-3 text-xs text-amber-700">
-                              {loc.spec_label || "—"}
-                            </td>
-                            <td className="px-4 py-3 text-right text-xs font-bold text-amber-800">
-                              {loc.quantity.toFixed(3)}
-                            </td>
-                            <td className="px-4 py-3 text-right text-xs text-amber-500">
-                              {loc.unit_code}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="mt-3 flex justify-end border-t border-amber-200 pt-2">
-                  <span className="text-xs font-bold text-amber-800">
-                    Total: {grouped.find((g) => g.product_id === expandedId)?.total_quantity.toFixed(3)}
-                  </span>
-                </div>
-              </div>
-            </td>
-          </tr>
-        )}
       </div>
 
       <div className="mt-4">
