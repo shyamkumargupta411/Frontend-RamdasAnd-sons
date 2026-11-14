@@ -371,7 +371,7 @@ export default function MaterialStockPage() {
                                         Shop
                                       </th>
                                       <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
-                                        Type
+                                        Spec Key
                                       </th>
                                       <th className="px-4 py-2 text-left text-xs font-bold uppercase tracking-wide text-amber-700">
                                         Variant Spec
@@ -399,8 +399,8 @@ export default function MaterialStockPage() {
                                               ({loc.shop_code})
                                             </span>
                                           </td>
-                                          <td className="px-4 py-3 text-xs">
-                                            <ShopTypeBadge shop_type={loc.shop_type} />
+                                          <td className="px-4 py-3 text-xs text-amber-700 font-mono truncate max-w-[120px]">
+                                            {loc.spec_key || "—"}
                                           </td>
                                           <td className="px-4 py-3 text-xs text-amber-700">
                                             {loc.spec_label || "—"}
