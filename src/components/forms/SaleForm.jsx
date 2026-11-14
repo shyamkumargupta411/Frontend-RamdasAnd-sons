@@ -75,7 +75,7 @@ export default function SaleForm({
         );
       }
     });
-  }, [variantObj, units]);
+  }, [lines, units]);
 
   const createMut = useMutation({
     mutationFn: salesApi.create,
