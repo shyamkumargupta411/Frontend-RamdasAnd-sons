@@ -157,19 +157,24 @@ export default function ProductVariantSelector({
               {variants.map((v) => {
                 const active = String(value?.variant) === String(v.id);
                 return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => pickVariant(v)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset transition ${
-                      active
-                        ? "bg-brand-900 text-white ring-brand-900"
-                        : "bg-white text-slate-700 ring-slate-300 hover:bg-amber-50"
-                    }`}
-                  >
-                    {v.spec_label} · {v.unit_code}
-                  </button>
+                    <button
+                      key={v.id}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => pickVariant(v)}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset transition ${
+                        active
+                          ? "bg-brand-900 text-white ring-brand-900"
+                          : "bg-white text-slate-700 ring-slate-300 hover:bg-amber-50"
+                      }`}
+                    >
+                      <div className="font-semibold text-slate-700">
+                        {v.spec_label} · {v.unit_code}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono leading-none">
+                        {v.spec_key}
+                      </div>
+                    </button>
                 );
               })}
             </div>
